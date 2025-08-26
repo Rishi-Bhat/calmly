@@ -1,61 +1,47 @@
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
-#Usado no POST
-class UserCreate(BaseModel):
+# User Schemas
+class UserBase(BaseModel):
     name: str
-    password: str
     email: str
-    
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
+    model_config = ConfigDict(from_attributes=True)
 
-#Usado no GET
-class User(BaseModel):
-    id: Optional[int]
-    name: str
+class UserCreate(UserBase):
+    password: str
 
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
+class UserRead(UserBase):
+    id: int
 
-class MoodCreate(BaseModel):
+class UserInDB(UserRead):
+    password: str
+
+# Mood Schemas
+class MoodBase(BaseModel):
     mood: int
     commentary: str
-    user_id: Optional[int]
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
+class MoodCreate(MoodBase):
+    user_id: int
 
-class Mood(BaseModel):
-    id: Optional[int]
+class MoodRead(MoodBase):
+    id: int
     date: datetime
-    mood: int
-    user_id: Optional[int]
+    user_id: int
 
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
-
-class JournalCreate(BaseModel):
+# Journal Schemas
+class JournalBase(BaseModel):
     title: str
     content: str
-    mood_id: Optional[int]
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
+class JournalCreate(JournalBase):
+    mood_id: int
 
-class Journal(BaseModel):
-    id: Optional[int]
-    date:datetime
-    title: str
-    content: str    
-    mood_id: Optional[int]
-
-    class Config:
-        #Conversão SQL para Pydantic
-        orm_mode = True 
+class JournalRead(JournalBase):
+    id: int
+    date: datetime
+    mood_id: int
