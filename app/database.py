@@ -1,18 +1,16 @@
-from sqlmodel import SQLModel, create_engine, Session
-from app import models
 
-# Conexão com o banco de dados SQLite
-DATABASE_URL = "sqlite:///./meal_tracker.db"
+
+import os
+from dotenv import load_dotenv
+from sqlmodel import SQLModel, create_engine, Session
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(DATABASE_URL, echo=True)
 
-# Função para criar as tabelas no banco de dados
 def init_session():
     SQLModel.metadata.create_all(bind=engine)
 
-# Função para obter a sessão do banco de dados
 def get_session():
-    session = Session(engine)
-    try:
-        return session
-    finally:
-        session.close()
+    with Session(engine) as session:
+        yield session
