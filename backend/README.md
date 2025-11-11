@@ -36,18 +36,42 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up environment variables
+### 4. Set up PostgreSQL database
 
-Create a `.env` file in the project root with the following content:
+Make sure PostgreSQL is installed and running, then create a database:
+
+```bash
+# On macOS/Linux
+psql -U postgres
+CREATE DATABASE calmly;
+\q
+
+# On Windows (using psql in Command Prompt)
+psql -U postgres
+CREATE DATABASE calmly;
+\q
+```
+
+### 5. Set up environment variables
+
+Copy the example environment file and update with your credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your actual values:
 
 ```
-DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<your_db>
-SECRET_KEY=your-secret-key
+DATABASE_URL=postgresql://your_username:your_password@localhost:5432/calmly
+SECRET_KEY=generate-a-secure-random-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-### 5. Run the application
+**Important:** Never commit your `.env` file to version control!
+
+### 6. Run the application
 
 ```bash
 uvicorn app.main:app --reload
@@ -55,11 +79,11 @@ uvicorn app.main:app --reload
 
 The API will be available at [http://localhost:8000](http://localhost:8000)
 
-### 6. API Documentation
+### 7. API Documentation
 
 Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 7. Running Tests
+### 8. Running Tests
 
 ```bash
 pytest -v
