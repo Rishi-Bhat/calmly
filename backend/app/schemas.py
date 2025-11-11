@@ -45,3 +45,22 @@ class JournalRead(JournalBase):
     id: int
     date: datetime
     mood_id: int
+
+# Resource Schemas
+class ResourceBase(BaseModel):
+    title: str
+    type: str
+    url: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    tags: Optional[str] = None
+    mood_tags: Optional[str] = None
+    description: Optional[str] = None
+    public: bool = True
+    model_config = ConfigDict(from_attributes=True)
+
+class ResourceCreate(ResourceBase):
+    pass
+
+class ResourceRead(ResourceBase):
+    id: str
+    created_at: datetime
