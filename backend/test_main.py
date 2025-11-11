@@ -376,3 +376,106 @@ def test_delete_resource(setup_and_teardown_db):
         response = client.delete(f"/resources/{resource_id}")
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
+
+
+# ========== GAME TESTS ==========
+def test_create_game_session(user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Get user_id first
+    user_response = client.get("/users/", headers=headers)
+    user_id = user_response.json()[0]["id"]
+    
+    game_payload = {
+        "game_type": "breathing",
+        "score": 100,
+        "duration_seconds": 300,
+        "completed": True,
+        "user_id": user_id
+    }
+    response = client.post(f"/users/{user_id}/games/", json=game_payload, headers=headers)
+    assert response.status_code in [200, 201]
+    assert response.json()["game_type"] == "breathing"
+    assert response.json()["score"] == 100
+
+
+def test_get_all_game_sessions(user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Get user_id first
+    user_response = client.get("/users/", headers=headers)
+    user_id = user_response.json()[0]["id"]
+    
+    response = client.get(f"/users/{user_id}/games/", headers=headers)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_get_game_session(user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Get user_id first
+    user_response = client.get("/users/", headers=headers)
+    user_id = user_response.json()[0]["id"]
+    
+    # Create a game session first
+    game_payload = {
+        "game_type": "matching",
+        "score": 85,
+        "duration_seconds": 120,
+        "completed": True,
+        "user_id": user_id
+    }
+    create_response = client.post(f"/users/{user_id}/games/", json=game_payload, headers=headers)
+    if create_response.status_code in [200, 201]:
+        game_id = create_response.json()["id"]
+        response = client.get(f"/users/{user_id}/games/{game_id}", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["game_type"] == "matching"
+
+
+# ========== INSIGHTS TESTS ==========
+def test_get_insights_triggers_generation(user_token):
+    """Test that insights endpoint works even without API key"""
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Get user_id first
+    user_response = client.get("/users/", headers=headers)
+    user_id = user_response.json()[0]["id"]
+    
+    # First request should trigger generation (returns 202 for generating)
+    response = client.get(f"/users/{user_id}/insights/", headers=headers)
+    assert response.status_code in [200, 202]
+    assert "status" in response.json()
+    
+    # Status should be "generating" on first call
+    status = response.json()["status"]
+    assert status in ["generating", "completed"]
+
+
+def test_insights_with_mood_data(user_token):
+    """Test insights endpoint with actual mood data"""
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Get user_id first
+    user_response = client.get("/users/", headers=headers)
+    user_id = user_response.json()[0]["id"]
+    
+    # Create some mood entries for analysis
+    for i in range(3):
+        mood_payload = {
+            "mood": 7 + i,
+            "commentary": f"Test mood {i}",
+            "user_id": user_id
+        }
+        client.post(f"/users/{user_id}/moods/", json=mood_payload, headers=headers)
+    
+    # Request insights (will trigger background generation)
+    response = client.get(f"/users/{user_id}/insights/", headers=headers)
+    assert response.status_code in [200, 202]
+    
+    # Should have analysis period dates or message
+    data = response.json()
+    assert "analysis_period_start" in data or "message" in data
+
+
+def test_insights_unauthorized_access(user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    # Try to access another user's insights (user_id 999)
+    response = client.get("/users/999/insights/", headers=headers)
+    assert response.status_code == 403

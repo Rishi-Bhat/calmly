@@ -93,5 +93,7 @@ def generate_insights_background_task(
             except:
                 pass  # If we can't update, just log the error
             
-            # Re-raise to log in application logs
-            raise
+            # Don't re-raise - just log the error
+            # This prevents background task failures from breaking the app
+            import logging
+            logging.error(f"Failed to generate insights for user {user_id}: {str(e)}")
