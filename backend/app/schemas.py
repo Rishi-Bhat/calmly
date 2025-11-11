@@ -64,3 +64,28 @@ class ResourceCreate(ResourceBase):
 class ResourceRead(ResourceBase):
     id: str
     created_at: datetime
+
+# Insights Schemas
+class InsightsResponse(BaseModel):
+    status: str  # "completed" or "generating"
+    insights: Optional[dict] = None
+    generated_at: Optional[datetime] = None
+    analysis_period_start: Optional[datetime] = None
+    analysis_period_end: Optional[datetime] = None
+    message: Optional[str] = None  # For "generating" status
+
+# Game Schemas
+class GameSessionBase(BaseModel):
+    game_type: str
+    score: Optional[int] = None
+    duration_seconds: Optional[int] = None
+    completed: bool = False
+    model_config = ConfigDict(from_attributes=True)
+
+class GameSessionCreate(GameSessionBase):
+    user_id: int
+
+class GameSessionRead(GameSessionBase):
+    id: int
+    user_id: int
+    date: datetime

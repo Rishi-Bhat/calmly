@@ -6,6 +6,8 @@ from app.routes.users import router as users_router
 from app.routes.moods import router as moods_router
 from app.routes.journals import router as journals_router
 from app.routes.resources import router as resources_router
+from app.routes.insights import router as insights_router
+from app.routes.games import router as games_router
 
 init_session()
 
@@ -20,3 +22,5 @@ app.include_router(users_router)
 app.include_router(moods_router)
 app.include_router(journals_router)
 app.include_router(resources_router)
+app.include_router(insights_router)
+app.include_router(games_router)

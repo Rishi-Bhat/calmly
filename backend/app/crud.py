@@ -125,3 +125,28 @@ def delete_journal(session: Session, mood_id: int, id: int):
     session.delete(journal)
     session.commit()
     return journal
+
+# ----------------------- Game Sessions -----------------------------
+def create_game_session(user_id: int, session: Session, game_session: schemas.GameSessionCreate):
+    session_game = models.GameSession(
+        user_id=user_id,
+        game_type=game_session.game_type,
+        score=game_session.score,
+        duration_seconds=game_session.duration_seconds,
+        completed=game_session.completed
+    )
+    session.add(session_game)
+    session.commit()
+    session.refresh(session_game)
+    return session_game
+
+def get_all_game_sessions_by_user(session: Session, user_id: int):
+    statement = select(models.GameSession).where(models.GameSession.user_id == user_id)
+    return session.exec(statement).all()
+
+def get_game_session(session: Session, user_id: int, game_id: int):
+    statement = select(models.GameSession).where(
+        models.GameSession.user_id == user_id,
+        models.GameSession.id == game_id
+    )
+    return session.exec(statement).first()

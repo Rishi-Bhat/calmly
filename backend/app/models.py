@@ -26,3 +26,21 @@ class Journal(SQLModel, table=True):
     content: str
     mood_id: int = Field(foreign_key="mood.id")
     mood: Optional["Mood"] = Relationship(back_populates="journals")
+
+class AIInsights(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", unique=True)
+    insights_json: str  # JSON string of insights
+    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    analysis_period_start: datetime
+    analysis_period_end: datetime
+    status: str = "completed"  # "generating", "completed", "failed"
+
+class GameSession(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    game_type: str  # "matching", "breathing", etc.
+    score: Optional[int] = None
+    duration_seconds: Optional[int] = None
+    completed: bool = False
+    date: datetime = Field(default_factory=datetime.utcnow)
